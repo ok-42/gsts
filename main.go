@@ -19,7 +19,7 @@ func MakeDataTypes() map[string]string {
 }
 
 // Returns struct attributes and their types respectively
-func GetAttrs(
+func getAttrs(
 	obj interface{},
 	prefix string,
 	index *int,
@@ -57,7 +57,7 @@ func GetAttrs(
 			} else {
 				newPrefix = prefix
 			}
-			GetAttrs(
+			getAttrs(
 				reflect.New(fieldType).Elem().Interface(),
 				newPrefix+field.Name+"_",
 				index,
@@ -75,15 +75,11 @@ func GetAttrs(
 	}
 }
 
-// Generate a CREATE TABLE query
-func GenerateCreationQuery(
-	obj interface{},
-	data map[string]string,
-) string {
+func GetAttrs(obj interface{}) ([]string, []string) {
 	var n int = 20
 	fieldNames := make([]string, n)
 	fieldTypes := make([]string, n)
-	GetAttrs(obj, "", new(int), fieldNames, fieldTypes)
+	getAttrs(obj, "", new(int), fieldNames, fieldTypes)
 	for i, v := range fieldNames {
 		if v == "" {
 			n = i
@@ -92,17 +88,21 @@ func GenerateCreationQuery(
 	}
 	fieldNames = fieldNames[:n]
 	fieldTypes = fieldTypes[:n]
+	return fieldNames, fieldTypes
+}
+
+// Generate a CREATE TABLE query
+func GenerateCreationQuery(
+	obj interface{},
+	data map[string]string,
+) string {
+	fieldNames, fieldTypes := GetAttrs(obj)
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("create table %s (\n", reflect.TypeOf(obj).Elem().Name()))
-	for i := 0; i < n; i++ {
-		name := fieldNames[i]
+	for i, name := range fieldNames {
 		goType := fieldTypes[i]
 		sqlType := data[goType]
 		sb.WriteString(fmt.Sprintf("    %s %s,\n", name, sqlType))
 	}
 	return strings.TrimSuffix(sb.String(), ",\n") + "\n)\n"
-}
-
-func main() {
-
 }

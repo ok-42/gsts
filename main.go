@@ -51,9 +51,15 @@ func GetAttrs(
 
 		// Extract fields from an embedded or nested struct
 		if kind == reflect.Struct {
+			var newPrefix string
+			if prefix == "" {
+				newPrefix = ""
+			} else {
+				newPrefix = prefix
+			}
 			GetAttrs(
 				reflect.New(fieldType).Elem().Interface(),
-				field.Name+"_",
+				newPrefix+field.Name+"_",
 				index,
 				outNames,
 				outTypes,

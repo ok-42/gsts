@@ -71,17 +71,26 @@ func GetAttrs(
 
 // Generate a CREATE TABLE query
 func GenerateCreationQuery(
+	obj interface{},
 	data map[string]string,
-	name string,
-	columnNames []string,
-	columnTypes []string,
 ) string {
+	var n int = 20
+	fieldNames := make([]string, n)
+	fieldTypes := make([]string, n)
+	GetAttrs(obj, "", new(int), fieldNames, fieldTypes)
+	for i, v := range fieldNames {
+		if v == "" {
+			n = i
+			break
+		}
+	}
+	fieldNames = fieldNames[:n]
+	fieldTypes = fieldTypes[:n]
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("create table %s (\n", name))
-	n := len(columnNames)
+	sb.WriteString(fmt.Sprintf("create table %s (\n", reflect.TypeOf(obj).Elem().Name()))
 	for i := 0; i < n; i++ {
-		name := columnNames[i]
-		goType := columnTypes[i]
+		name := fieldNames[i]
+		goType := fieldTypes[i]
 		sqlType := data[goType]
 		sb.WriteString(fmt.Sprintf("    %s %s,\n", name, sqlType))
 	}

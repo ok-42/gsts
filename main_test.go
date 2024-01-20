@@ -44,25 +44,6 @@ func TestMain(t *testing.T) {
 		Order: order,
 		Field: "string",
 	}
-
-	var n int = 20
-	fieldNames := make([]string, n)
-	fieldTypes := make([]string, n)
-	GetAttrs(alice, "", new(int), fieldNames, fieldTypes)
-	for i, v := range fieldNames {
-		if v == "" {
-			n = i
-			break
-		}
-	}
-	fmt.Println("Attribute            Type")
-	fmt.Println("----------------------------------")
-	fieldNames = fieldNames[:n]
-	fieldTypes = fieldTypes[:n]
-	for i := 0; i < n; i++ {
-		fmt.Printf("%-25v %-10s\n", fieldNames[i], fieldTypes[i])
-	}
-
-	query := GenerateCreationQuery(MakeDataTypes(), "Customer", fieldNames, fieldTypes)
+	query := GenerateCreationQuery(alice, MakeDataTypes())
 	fmt.Print("\n", query)
 }

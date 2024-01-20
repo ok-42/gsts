@@ -25,6 +25,7 @@ type Customer struct {
 	Name  string
 	Email string
 	*Order
+	Field string
 }
 
 func TestMain(t *testing.T) {
@@ -41,11 +42,23 @@ func TestMain(t *testing.T) {
 		Name:  "Alice",
 		Email: "alice@example.com",
 		Order: order,
+		Field: "string",
 	}
 
-	fieldNames, fieldTypes, n := GetAttrs(alice)
+	var n int = 20
+	fieldNames := make([]string, n)
+	fieldTypes := make([]string, n)
+	GetAttrs(alice, "", new(int), fieldNames, fieldTypes)
+	for i, v := range fieldNames {
+		if v == "" {
+			n = i
+			break
+		}
+	}
 	fmt.Println("Attribute            Type")
 	fmt.Println("----------------------------------")
+	fieldNames = fieldNames[:n]
+	fieldTypes = fieldTypes[:n]
 	for i := 0; i < n; i++ {
 		fmt.Printf("%-25v %-10s\n", fieldNames[i], fieldTypes[i])
 	}

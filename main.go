@@ -19,17 +19,18 @@ func MakeDataTypes() map[string]string {
 }
 
 // Returns struct attributes and their types respectively
-func GetAttrs(obj interface{}) ([]string, []string, int) {
+func GetAttrs(
+	obj interface{},
+	prefix string,
+	index *int,
+	outNames []string,
+	outTypes []string,
+) {
 	var t reflect.Type = reflect.TypeOf(obj)
 	if t.Kind() == reflect.Pointer {
 		t = t.Elem()
 	}
 	var n int = t.NumField()
-
-	var outNames = make([]string, n)
-	var outTypes = make([]string, n)
-	var innerNames []string
-	var innerTypes []string
 
 	for i := 0; i < n; i++ {
 
@@ -50,26 +51,22 @@ func GetAttrs(obj interface{}) ([]string, []string, int) {
 
 		// Extract fields from an embedded or nested struct
 		if kind == reflect.Struct {
-			outNames[i] = "(nested)"
-			outTypes[i] = "(nested)"
-			resNames, resTypes, nn := GetAttrs(reflect.New(fieldType).Elem().Interface())
-			for i := 0; i < nn; i++ {
-				resNames[i] = field.Name + "_" + resNames[i]
-			}
-			innerNames = append(innerNames, resNames...)
-			innerTypes = append(innerTypes, resTypes...)
+			GetAttrs(
+				reflect.New(fieldType).Elem().Interface(),
+				field.Name+"_",
+				index,
+				outNames,
+				outTypes,
+			)
 		} else
 
 		// Add field name and type to the result
 		{
-			outNames[i] = field.Name
-			outTypes[i] = typ.Name()
+			outNames[*index] = prefix + field.Name
+			outTypes[*index] = typ.Name()
+			*index++
 		}
 	}
-
-	outNames = append(outNames, innerNames...)
-	outTypes = append(outTypes, innerTypes...)
-	return outNames, outTypes, len(outNames)
 }
 
 // Generate a CREATE TABLE query

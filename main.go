@@ -100,8 +100,7 @@ func GenerateCreationQuery(
 		sqlType := data[goType]
 		sb.WriteString(fmt.Sprintf("    %s %s,\n", name, sqlType))
 	}
-	sb.WriteString(")\n")
-	return sb.String()
+	return strings.TrimSuffix(sb.String(), ",\n") + "\n)\n"
 }
 
 func main() {

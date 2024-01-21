@@ -3,10 +3,28 @@
 package gsts
 
 import (
+	"database/sql"
 	"fmt"
 	"reflect"
 	"strings"
 )
+
+var (
+	db    *sql.DB
+	err   error
+	query string
+	res   sql.Result
+)
+
+var dataTypes = new(map[string]string)
+
+func Init() {
+	db, err = sql.Open("sqlite", ":memory:")
+	if err != nil {
+		panic(err)
+	}
+	*dataTypes = MakeDataTypes()
+}
 
 // Mapping of Go and SQLite data types
 func MakeDataTypes() map[string]string {
@@ -92,16 +110,13 @@ func GetAttrs(obj interface{}) ([]string, []string) {
 }
 
 // Generate a CREATE TABLE query
-func GenerateCreationQuery(
-	obj interface{},
-	data map[string]string,
-) string {
+func GenerateCreationQuery(obj interface{}) string {
 	fieldNames, fieldTypes := GetAttrs(obj)
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("create table %s (\n", reflect.TypeOf(obj).Elem().Name()))
 	for i, name := range fieldNames {
 		goType := fieldTypes[i]
-		sqlType := data[goType]
+		sqlType := (*dataTypes)[goType]
 		sb.WriteString(fmt.Sprintf("    %s %s,\n", name, sqlType))
 	}
 	return strings.TrimSuffix(sb.String(), ",\n") + "\n)\n"

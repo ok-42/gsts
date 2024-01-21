@@ -29,7 +29,7 @@ type Customer struct {
 }
 
 func TestMain(t *testing.T) {
-
+	Init()
 	var phone = Product{
 		Name:  "CellPhone",
 		Price: 42.50,
@@ -44,6 +44,6 @@ func TestMain(t *testing.T) {
 		Order: order,
 		Field: "string",
 	}
-	query := GenerateCreationQuery(alice, MakeDataTypes())
+	query = GenerateCreationQuery(alice)
 	fmt.Print("\n", query)
 }

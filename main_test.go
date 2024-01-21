@@ -6,6 +6,8 @@ package gsts
 import (
 	"fmt"
 	"testing"
+
+	_ "modernc.org/sqlite"
 )
 
 // Only basic data types
@@ -46,4 +48,9 @@ func TestMain(t *testing.T) {
 	}
 	query = GenerateCreationQuery(alice)
 	fmt.Print("\n", query)
+}
+
+func TestCreateTable(t *testing.T) {
+	Init()
+	CreateTable(&Product{})
 }

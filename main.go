@@ -121,3 +121,12 @@ func GenerateCreationQuery(obj interface{}) string {
 	}
 	return strings.TrimSuffix(sb.String(), ",\n") + "\n)\n"
 }
+
+// Accepts pointer to an empty struct
+func CreateTable(schema interface{}) {
+	query = GenerateCreationQuery(schema)
+	res, err = db.Exec(query)
+	if err != nil {
+		panic(err)
+	}
+}

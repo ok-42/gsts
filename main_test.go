@@ -54,3 +54,13 @@ func TestCreateTable(t *testing.T) {
 	Init()
 	CreateTable(&Product{})
 }
+
+func TestInsert(t *testing.T) {
+	var phone = &Product{
+		Name:  "CellPhone",
+		Price: 42.50,
+	}
+	Init()
+	CreateTable(&Product{})
+	Insert(phone)
+}

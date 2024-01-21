@@ -130,3 +130,50 @@ func CreateTable(schema interface{}) {
 		panic(err)
 	}
 }
+
+// Accepts pointer to a struct
+func Insert(obj interface{}) (LastInsertId int64) {
+
+	cNames, cTypes := GetAttrs(obj)
+	n := len(cNames)
+
+	// Generate INSERT query
+
+	var (
+		tableName  = reflect.TypeOf(obj).Elem().Name()
+		columns    = strings.Join(cNames, ",")
+		questMarks = strings.TrimSuffix(strings.Repeat("?,", n), ",")
+	)
+	query = fmt.Sprintf(
+		"insert into %s (%s) values (%s)",
+		tableName,
+		columns,
+		questMarks,
+	)
+
+	// Prepare INSERT args
+
+	args := make([]interface{}, n)
+	for i := 0; i < n; i++ {
+		field := reflect.Indirect(reflect.ValueOf(obj)).FieldByName(cNames[i])
+		switch cTypes[i] {
+		case "int":
+			args[i] = field.Int()
+		case "string":
+			args[i] = field.String()
+		case "float64":
+			args[i] = field.Float()
+		}
+	}
+
+	res, err = db.Exec(query, args...)
+	if err != nil {
+		panic(err)
+	}
+
+	LastInsertId, err = res.LastInsertId()
+	if err != nil {
+		panic(err)
+	}
+	return
+}

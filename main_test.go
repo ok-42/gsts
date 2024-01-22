@@ -30,6 +30,16 @@ type Customer struct {
 	Field string
 }
 
+type User struct {
+	ID    int
+	Name  string
+	Score float64
+}
+
+func (u *User) String() string {
+	return fmt.Sprintf("<ID=%d %s has score %f>", u.ID, u.Name, u.Score)
+}
+
 func TestMain(t *testing.T) {
 	Init()
 	var phone = Product{
@@ -63,4 +73,14 @@ func TestInsert(t *testing.T) {
 	Init()
 	CreateTable(&Product{})
 	Insert(phone)
+}
+
+func TestRead(t *testing.T) {
+	Init()
+	CreateTable(&User{})
+	var alice = User{ID: 42, Name: "Alice", Score: 12.34}
+	Insert(&alice)
+
+	var result User = Read[User]()
+	fmt.Println(result)
 }

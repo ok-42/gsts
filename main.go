@@ -177,3 +177,53 @@ func Insert(obj interface{}) (LastInsertId int64) {
 	}
 	return
 }
+
+func Read[T comparable]() T {
+
+	var zero *T
+	var typ reflect.Type = reflect.TypeOf(zero).Elem()
+	elem := reflect.New(typ).Elem()
+	columnNames, columnTypes := GetAttrs(elem.Interface())
+	nColumns := len(columnNames)
+
+	// Execute SELECT
+	query = fmt.Sprintf("select * from %s where ID = ?", typ.Name())
+	rows, _ := db.Query(query, 42)
+
+	for rows.Next() {
+
+		// Create nColumns pointers to corresponding types
+		var pointers = make([]interface{}, nColumns)
+		for i := 0; i < nColumns; i++ {
+			switch columnTypes[i] {
+			case "int":
+				pointers[i] = new(int)
+			case "string":
+				pointers[i] = new(string)
+			case "float64":
+				pointers[i] = new(float64)
+			}
+		}
+		err = rows.Scan(pointers...)
+		if err != nil {
+			panic(err)
+		}
+
+		for i := 0; i < nColumns; i++ {
+			field := elem.FieldByName(columnNames[i])
+			var ptr = pointers[i]
+			switch columnTypes[i] {
+			case "int":
+				ptr, _ := ptr.(*int)
+				field.SetInt(int64(*ptr))
+			case "string":
+				ptr, _ := ptr.(*string)
+				field.SetString(*ptr)
+			case "float64":
+				ptr, _ := ptr.(*float64)
+				field.SetFloat(*ptr)
+			}
+		}
+	}
+	return elem.Interface().(T)
+}

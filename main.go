@@ -122,6 +122,17 @@ func GenerateCreationQuery(obj interface{}) string {
 	return strings.TrimSuffix(sb.String(), ",\n") + "\n)\n"
 }
 
+func TableExists(tableName string) bool {
+	rows, err := db.Query("SELECT name FROM sqlite_master WHERE type='table' AND name=?", tableName)
+	if err != nil {
+		panic(err)
+	}
+	for rows.Next() {
+		return true
+	}
+	return false
+}
+
 // Accepts pointer to an empty struct
 func CreateTable(schema interface{}) {
 	query = GenerateCreationQuery(schema)
